@@ -2,7 +2,7 @@ import unittest
 
 from src.utils import QasmUtils
 from src.backends import QiskitSimBackend
-from src.ansatz_elements import DoubleExchange
+from src.ansatz_elements import DFExc
 
 import numpy
 
@@ -21,7 +21,7 @@ class AnsatzElementsTest(unittest.TestCase):
             qasm.append('x q[2];\n')
             qasm.append('x q[0];\n')
 
-            qasm.append(DoubleExchange([0, 2], [3, 5], rescaled_parameter=True, parity_dependence=True).get_qasm([angle]))
+            qasm.append(DFExc([0, 2], [3, 5], rescaled_parameter=True, parity_dependence=True).get_qasm([angle]))
             statevector = QiskitSimBackend.statevector_from_qasm(''.join(qasm))
 
             self.assertEqual(statevector[56].real.round(5), - statevector[40].real.round(5))
@@ -33,7 +33,7 @@ class AnsatzElementsTest(unittest.TestCase):
             qasm.append('x q[2];\n')
             qasm.append('x q[0];\n')
 
-            qasm.append(DoubleExchange([0, 2], [3, 5], rescaled_parameter=True).get_qasm([angle]))
+            qasm.append(DFExc([0, 2], [3, 5], rescaled_parameter=True).get_qasm([angle]))
             statevector = QiskitSimBackend.statevector_from_qasm(''.join(qasm))
 
             self.assertEqual(statevector[56].real.round(5), statevector[40].real.round(5))

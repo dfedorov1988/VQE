@@ -2,7 +2,6 @@ import pandas
 
 import sys
 sys.path.append('../../')
-
 from src.vqe_runner import VQERunner
 from src.q_system import *
 from src.ansatz_element_sets import *
@@ -18,10 +17,11 @@ if __name__ == "__main__":
 
     # <<<<<<<<<<< MOLECULE PARAMETERS >>>>>>>>>>>>>
     r = 1.546
-    # theta = 0.538*numpy.pi # for H20
-    frozen_els = {'occupied': [], 'unoccupied': []}
-    molecule = LiH(r=r)  # (frozen_els=frozen_els)
-
+    r = 1.0285 # for H2O
+    theta = 0.538*numpy.pi # for H20
+    frozen_els = {'occupied': [0,1], 'unoccupied': []}
+    # molecule = LiH(r=r)  # (frozen_els=frozen_els)
+    molecule = H2O(r=r, theta=theta, frozen_els=frozen_els)
     # <<<<<<<<<< ANSATZ ELEMENT POOL PARAMETERS >>>>>>>>>>>>.
     # ansatz_element_type = 'eff_f_exc'
     ansatz_element_type = 'q_exc'
@@ -29,23 +29,23 @@ if __name__ == "__main__":
     # ansatz_element_type = 'pauli_str_exc'
 
     # <<<<<<<<<< IQEB-VQE PARAMETERS >>>>>>>>>>>>>>>>>
-    delta_e_threshold = 1e-12  # 1e-3 for chemical accuracy
+    delta_e_threshold = 1e-3  # 1e-3 for chemical accuracy
     max_ansatz_size = 250
     n_largest_grads = 10
 
     # <<<<<<<<<<<< DEFINE BACKEND >>>>>>>>>>>>>>>>>
     backend = backends.MatrixCacheBackend
-
+    # backend= backends.QiskitSimBackend
     # <<<<<<<<<< DEFINE OPTIMIZER >>>>>>>>>>>>>>>>>
     use_energy_vector_gradient = True  # for optimizer
 
     # create a vqe_runner object
-    vqe_runner = VQERunner(molecule, backend=backend, optimizer='BFGS', optimizer_options={'gtol': 1e-08},
+    vqe_runner = VQERunner(molecule, backend=backend, optimizer='COBYLA', optimizer_options={'gtol': 1e-08},
                            use_ansatz_gradient=use_energy_vector_gradient)
 
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    LogUtils.log_config()
+    LogUtils.log_config() # this gives FileNotFoundError if logs directory does not exist
     logging.info('{}, r={} ,{}'.format(molecule.name, r, ansatz_element_type))
     time_stamp = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
 

@@ -23,12 +23,12 @@ import ast
 if __name__ == "__main__":
 
     r = 1.5
-    molecule = BeH2(r=r)  #frozen_els={'occupied': [0, 1], 'unoccupied': []})
+    molecule = LiH(r=r)  #frozen_els={'occupied': [0, 1], 'unoccupied': []})
 
     # logging
     LogUtils.log_config()
 
-    df = pandas.read_csv("../results/iter_vqe_results/BeH2_iqeb_vqe_r=15_19-Nov-2020.csv")
+    df = pandas.read_csv("results/iter_vqe_results/test1.csv")
     # df = pandas.read_csv("../x_sdfsd.csv")
 
     state = DataUtils.ansatz_from_data_frame(df, molecule)
