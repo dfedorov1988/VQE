@@ -296,7 +296,7 @@ class GlobalCache(Cache):
         del exc_gen_matrices_sum
         del H_sparse_matrix
         del excitations_generators_matrices
-        print('Calculated commutator time ', time.time() - t0)
+        #print('Calculated commutator time ', time.time() - t0)
         return commutator_sparse_matrix
 
     @staticmethod
@@ -310,7 +310,7 @@ class GlobalCache(Cache):
             excitations_generators_matrices.append(get_sparse_operator(term, n_qubits=n_qubits))
             sqr_excitations_generators_matrices_form.append(excitations_generators_matrices[-1]*excitations_generators_matrices[-1])
 
-        print('Calculated excitation matrix time ', time.time() - t0)
+        #print('Calculated excitation matrix time ', time.time() - t0)
         return excitations_generators_matrices, sqr_excitations_generators_matrices_form
 
 

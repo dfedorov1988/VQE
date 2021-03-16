@@ -163,7 +163,7 @@ class GradientUtils:
         message = 'Excitation {}. Excitation grad {}. Time {}'.format(excitation.element, gradient, time.time() - t0)
         # TODO check if required
         del thread_cache
-        print(message)  # keep this since logging does not work well in multithreading
+        #print(message)  # keep this since logging does not work well in multithreading
         return gradient
 
     # finds energy gradient of <H> w.r.t. to the ansatz_elements variational parameters
