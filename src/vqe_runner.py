@@ -31,7 +31,7 @@ class VQERunner:
 
         self.iteration = 0
         self.time_previous_iter = 0
-
+        
     # TODO split this into a proper callback function!!!!!!
     def get_energy(self, var_parameters, ansatz, backend, multithread=False, multithread_iteration=None,
                    init_state_qasm=None, cache=None, excited_state=0):
@@ -42,7 +42,6 @@ class VQERunner:
 
         energy = backend.ham_expectation_value(var_parameters, ansatz, self.q_system, cache=cache,
                                                init_state_qasm=init_state_qasm, excited_state=excited_state)
-
         if multithread:
             if multithread_iteration is not None:
                 try:
@@ -59,7 +58,8 @@ class VQERunner:
             if self.print_var_parameters:
                 message += ' Params: ' + str(var_parameters)
             logging.info(message)
-
+            # tmp_message = "Optimizer tolerance: {}".format(config.optimizer_tol)
+            # logging.info(tmp_message)
             self.iteration += 1
 
         return energy
@@ -94,7 +94,6 @@ class VQERunner:
             result = scipy.optimize.minimize(get_energy, var_parameters, method=self.optimizer,
                                              options=self.optimizer_options, tol=config.optimizer_tol,
                                              bounds=config.optimizer_bounds)
-
         result['n_iters'] = self.iteration  # cheating
 
         return result

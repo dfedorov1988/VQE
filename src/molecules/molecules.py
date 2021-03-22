@@ -110,4 +110,12 @@ class H2O(QSystem):
             ['H', [0, r*numpy.sin(numpy.pi - theta), r*numpy.cos(numpy.pi - theta)]]
         ]
 
+class N2(QSystem):
+    def __init__(self, r=1.098, basis='sto-3g', frozen_els=None):
+        super(N2, self).__init__(name='N2', geometry=self.get_geometry(r), multiplicity=1, charge=0, n_orbitals=16,
+                                  n_electrons=14, basis=basis, frozen_els=frozen_els)
 
+    @staticmethod
+    def get_geometry(r=1.098):
+        return [['N', [0, 0, 0]],
+                ['N', [0, 0, r]]]

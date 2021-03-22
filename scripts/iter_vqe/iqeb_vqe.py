@@ -16,12 +16,14 @@ if __name__ == "__main__":
     # <<<<<<<<<ITER VQE PARAMETERS>>>>>>>>>>>>>>>>>>>>
 
     # <<<<<<<<<<< MOLECULE PARAMETERS >>>>>>>>>>>>>
-    r = 1.546
-    r = 1.0285 # for H2O
+    r = 1.098 # N2
+    # r = 1.546 # LiH
+    # r = 1.0285 # for H2O
     theta = 0.538*numpy.pi # for H20
-    frozen_els = {'occupied': [0,1], 'unoccupied': []}
+    frozen_els = {'occupied': [0, 1, 2, 3], 'unoccupied': []}
     # molecule = LiH(r=r)  # (frozen_els=frozen_els)
-    molecule = H2O(r=r, theta=theta, frozen_els=frozen_els)
+    molecule = N2(r=r, frozen_els=frozen_els)
+    print("exact energy =", molecule.fci_energy)
     # <<<<<<<<<< ANSATZ ELEMENT POOL PARAMETERS >>>>>>>>>>>>.
     # ansatz_element_type = 'eff_f_exc'
     ansatz_element_type = 'q_exc'
@@ -40,9 +42,8 @@ if __name__ == "__main__":
     use_energy_vector_gradient = True  # for optimizer
 
     # create a vqe_runner object
-    vqe_runner = VQERunner(molecule, backend=backend, optimizer='COBYLA', optimizer_options={'gtol': 1e-08},
+    vqe_runner = VQERunner(molecule, backend=backend, optimizer='BFGS', optimizer_options={'gtol': 1e-06, 'maxiter':2000},
                            use_ansatz_gradient=use_energy_vector_gradient)
-
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     LogUtils.log_config() # this gives FileNotFoundError if logs directory does not exist
@@ -50,8 +51,11 @@ if __name__ == "__main__":
     time_stamp = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
 
     # create the pool of ansatz elements
-    ansatz_element_pool = SDExcitations(molecule.n_orbitals, molecule.n_electrons,
+    ansatz_element_pool = GSDExcitations(molecule.n_orbitals, molecule.n_electrons,
                                         ansatz_element_type=ansatz_element_type).get_excitations()
+
+    # ansatz_element_pool = SDExcitations(molecule.n_orbitals, molecule.n_electrons,
+    #                                     ansatz_element_type=ansatz_element_type).get_excitations()
 
     # create simulation cache
     if backend == backends.MatrixCacheBackend:
@@ -111,27 +115,38 @@ if __name__ == "__main__":
         print(compl_element_to_add.excitations_generators)
 
         # TODO check the if condition
+        # presumably this is spin complemented operators?
         comp_qubits = compl_element_to_add.qubits
         qubits = element_to_add.qubits
-        if [set(qubits[0]), set(qubits[1])] == [set(comp_qubits[0]), set(comp_qubits[1])] or \
-           [set(qubits[0]), set(qubits[1])] == [set(comp_qubits[1]), set(comp_qubits[0])]:
-            result = vqe_runner.vqe_run(ansatz=ansatz + [element_to_add],
+
+        result = vqe_runner.vqe_run(ansatz=ansatz + [element_to_add],
                                         init_guess_parameters=ansatz_parameters + [0], cache=global_cache)
-            current_energy = result.fun
-            delta_e = previous_energy - current_energy
-            if delta_e > 0:
-                ansatz.append(element_to_add)
-                new_ansatz_elements = [element_to_add]
-        else:
-            result = vqe_runner.vqe_run(ansatz=ansatz + [element_to_add, compl_element_to_add],
-                                        init_guess_parameters=ansatz_parameters + [0, 0], cache=global_cache)
-            current_energy = result.fun
-            delta_e = previous_energy - current_energy
-            if delta_e > 0:
-                ansatz.append(element_to_add)
-                ansatz.append(compl_element_to_add)
-                print('Add complement element: ', compl_element_to_add.element)
-                new_ansatz_elements = [element_to_add, compl_element_to_add]
+        current_energy = result.fun
+        delta_e = previous_energy - current_energy
+        if delta_e > 0:
+            ansatz.append(element_to_add)
+            new_ansatz_elements = [element_to_add]
+
+
+        # if [set(qubits[0]), set(qubits[1])] == [set(comp_qubits[0]), set(comp_qubits[1])] or \
+        #    [set(qubits[0]), set(qubits[1])] == [set(comp_qubits[1]), set(comp_qubits[0])]:
+        #     result = vqe_runner.vqe_run(ansatz=ansatz + [element_to_add],
+        #                                 init_guess_parameters=ansatz_parameters + [0], cache=global_cache)
+        #     current_energy = result.fun
+        #     delta_e = previous_energy - current_energy
+        #     if delta_e > 0:
+        #         ansatz.append(element_to_add)
+        #         new_ansatz_elements = [element_to_add]
+        # else:
+        #     result = vqe_runner.vqe_run(ansatz=ansatz + [element_to_add, compl_element_to_add],
+        #                                 init_guess_parameters=ansatz_parameters + [0, 0], cache=global_cache)
+        #     current_energy = result.fun
+        #     delta_e = previous_energy - current_energy
+        #     if delta_e > 0:
+        #         ansatz.append(element_to_add)
+        #         ansatz.append(compl_element_to_add)
+        #         print('Add complement element: ', compl_element_to_add.element)
+        #         new_ansatz_elements = [element_to_add, compl_element_to_add]
 
         # get initial guess for the var. params. for the next iteration
         ansatz_parameters = list(result.x)
